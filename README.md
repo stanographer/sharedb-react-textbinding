@@ -29,3 +29,4 @@ class Example extends Component {
 ## License
 
 MIT © [stanographer](https://github.com/stanographer)
+# sharedb-react-textbinding

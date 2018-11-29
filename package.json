@@ -57,5 +57,11 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "ot-text": "^1.0.1",
+    "prop-types": "^15.6.2",
+    "sharedb": "^1.0.0-beta.16",
+    "text-diff-binding": "^1.1.0"
+  }
 }
