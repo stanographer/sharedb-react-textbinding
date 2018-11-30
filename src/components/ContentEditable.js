@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 export default class ContentEditable extends Component {
   static propTypes = {
     text: PropTypes.string
-  }
+  };
 
   render() {
     const {
@@ -12,8 +12,8 @@ export default class ContentEditable extends Component {
     } = this.props;
 
     return (
-      <div className={styles.test}>
-        Example Component: {text}
+      <div>
+        {text}
       </div>
     );
   }

@@ -29,7 +29,7 @@ ReactStringBinding.prototype.attachDoc = function() {
 };
 
 ReactStringBinding.prototype._onOp = function(op, source) {
-  if (source === this) return;
+  if (source === this) return;u
   if (op.length === 0) return;
   if (op.length > 1) {
     throw new Error('Op with multiple components emitted');

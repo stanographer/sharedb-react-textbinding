@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TextArea from './components/TextArea';
 import ContentEditable from './components/ContentEditable';
-import OtText from 'ot-text/text';
-import ReactStringBinding from './ReactStringBinding';
 
 export default class ShareDBBinding extends Component {
   static propTypes = {
@@ -19,8 +17,13 @@ export default class ShareDBBinding extends Component {
     };
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.subscribe(this.props);
+  }
+
+  componentWillUnmount() {
+    this.props.doc.unsubscribe();
+    this.props.doc.destroy();
   }
 
   subscribe(props) {
@@ -48,7 +51,8 @@ export default class ShareDBBinding extends Component {
       doc.unsubscribe();
     });
 
-    doc.on('op', op => {
+    doc.on('op', (op, localContext) => {
+      console.log('FUCK')
       this.onOp(op);
     });
   }
@@ -94,7 +98,7 @@ export default class ShareDBBinding extends Component {
 
   replaceText = (newText, transformCursor) => {
     if (transformCursor) {
-      console.log(`there's a selection start.`);
+      // console.log(`there's a selection start.`);
     }
 
     this.snapshot = newText;
@@ -109,14 +113,13 @@ export default class ShareDBBinding extends Component {
   };
 
   render() {
-    console.log(this.props.doc);
     const {
-      doc,
       elementType
     } = this.props;
 
     const element = elementType === 'contentEditable'
-      ? <ContentEditable doc={doc} />
+      ? <ContentEditable
+        text={this.state.text} />
       : <TextArea
         text={this.state.text} />;
 
