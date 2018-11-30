@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import TextArea from './components/TextArea';
-import ContentEditable from './components/ContentEditable';
+// import TextArea from './components/TextArea';
+// import ContentEditable from './components/ContentEditable';
 
 export default class ShareDBBinding extends Component {
   static propTypes = {
+    cssClass: PropTypes.string,
     doc: PropTypes.object,
-    elementType: PropTypes.string
+    elementType: PropTypes.string,
+    onLoaded: PropTypes.func,
+    style: PropTypes.object
   };
 
   constructor(props) {
@@ -27,7 +30,7 @@ export default class ShareDBBinding extends Component {
   }
 
   subscribe(props) {
-    const { doc } = props;
+    const { doc, onLoaded } = props;
 
     doc.subscribe(err => {
       if (err) console.log(err);
@@ -43,6 +46,7 @@ export default class ShareDBBinding extends Component {
         text: doc.data
       }, () => {
         this.snapshot = doc.data;
+        onLoaded();
       });
     });
 
@@ -51,8 +55,7 @@ export default class ShareDBBinding extends Component {
       doc.unsubscribe();
     });
 
-    doc.on('op', (op, localContext) => {
-      console.log('FUCK')
+    doc.on('op', (op) => {
       this.onOp(op);
     });
   }
@@ -64,13 +67,14 @@ export default class ShareDBBinding extends Component {
       this._updateField(fields, op[i]);
     }
 
-    if (fields.insertStr.length > 0) {
-      // insert
-      this.onInsert(fields.pos, fields.insertStr);
-    }
     if (fields.delNum > 0) {
       // delete
       this.onRemove(fields.pos, fields.delNum);
+    }
+
+    if (fields.insertStr.length > 0) {
+      // insert
+      this.onInsert(fields.pos, fields.insertStr);
     }
 
     this.setState({
@@ -78,7 +82,7 @@ export default class ShareDBBinding extends Component {
     });
   }
 
-  _updateField = (fields, value) => {
+  _updateField(fields, value) {
     if (typeof value === 'number') {
       fields.pos = value;
     } else if (typeof value === 'string') {
@@ -88,40 +92,39 @@ export default class ShareDBBinding extends Component {
     }
   };
 
-  onInsert = (position, text) => {
-    const transformCursor = cursor =>
-      position < cursor ? cursor + text.length : cursor;
-
+  onInsert(position, text) {
     const previous = this.snapshot.replace(/\r\n/g, '\n');
-    this.replaceText(previous.slice(0, position) + text + previous.slice(position), transformCursor);
+    this.replaceText(previous.slice(0, position) + text + previous.slice(position));
   };
 
-  replaceText = (newText, transformCursor) => {
-    if (transformCursor) {
-      // console.log(`there's a selection start.`);
-    }
-
+  replaceText(newText) {
     this.snapshot = newText;
   };
 
-  onRemove = (position, length) => {
-    const transformCursor = cursor =>
-      position < cursor ? cursor - Math.min(length, cursor - position) : cursor;
-
+  onRemove(position, length) {
     const previous = this.snapshot.replace(/\r\n/g, '\n');
-    this.replaceText(previous.slice(0, position) + previous.slice(position + length), transformCursor);
+    this.replaceText(previous.slice(0, position) + previous.slice(position + length));
   };
 
   render() {
     const {
-      elementType
+      cssClass,
+      elementType,
+      style
     } = this.props;
 
+    const { text } = this.state;
+
     const element = elementType === 'contentEditable'
-      ? <ContentEditable
-        text={this.state.text} />
-      : <TextArea
-        text={this.state.text} />;
+      ? <div
+        className={cssClass || ''}
+        style={style || ''}>
+        {text}
+      </div>
+      : <textarea
+        value={text}
+        cols={100}
+        rows={100} />;
 
     return (
       element
