@@ -1,4 +1,9 @@
 # sharedb-react-textbinding
+Stanley Sakai
+
+To do: add implementation details.
+
+This component refactors ShareDB DOM bindings for use with React. It listens to a ShareDB subscribed document and funnels updates over WebSockets to and from component state rather than relying on DOM bindings and listeners.
 
 > React component that binds to ShareDB send and receive events.
 
