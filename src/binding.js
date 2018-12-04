@@ -54,11 +54,7 @@ export default class Binding {
   // in half, one before the location of the op, and after. Then joins them together.
   onInsert(position, text) {
     const previous = this.snapshot.replace(/\r\n/g, '\n');
-    if (this.subs && this.subs.length > 0) {
-      for (let i = 0; i < this.subs.length; i++) {
-        this.replace(subs[i])
-      }
-    }
+    // Implement subs.
     this.replaceText(previous.slice(0, position) + text + previous.slice(position));
   };
 
