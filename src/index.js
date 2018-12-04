@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-// import TextArea from './components/TextArea';
-// import ContentEditable from './components/ContentEditable';
+import Binding from './binding';
 
 export default class ShareDBBinding extends Component {
   static propTypes = {
@@ -9,7 +8,8 @@ export default class ShareDBBinding extends Component {
     doc: PropTypes.object,
     elementType: PropTypes.string,
     onLoaded: PropTypes.func,
-    style: PropTypes.object
+    style: PropTypes.object,
+    subs: PropTypes.object
   };
 
   constructor(props) {
@@ -42,12 +42,12 @@ export default class ShareDBBinding extends Component {
     });
 
     doc.on('load', () => {
+      console.log(doc.data);
+      this.binding = new Binding(doc.data);
+
       this.setState({
-        text: doc.data
-      }, () => {
-        this.snapshot = doc.data;
-        onLoaded();
-      });
+        text: this.binding.snapshot
+      }, onLoaded);
     });
 
     doc.on('del', () => {
@@ -55,56 +55,18 @@ export default class ShareDBBinding extends Component {
       doc.unsubscribe();
     });
 
-    doc.on('op', (op) => {
-      this.onOp(op);
+    doc.on('op', op => {
+      this.updateField(op);
     });
   }
 
-  onOp(op) {
-    const fields = { pos: 0, insertStr: '', delNum: 0 };
-
-    for (let i = 0; i < op.length; i++) {
-      this._updateField(fields, op[i]);
-    }
-
-    if (fields.delNum > 0) {
-      // delete
-      this.onRemove(fields.pos, fields.delNum);
-    }
-
-    if (fields.insertStr.length > 0) {
-      // insert
-      this.onInsert(fields.pos, fields.insertStr);
-    }
-
-    this.setState({
-      text: this.snapshot
-    });
+  updateField(op) {
+    setTimeout(() => {
+      this.setState({
+        text: this.binding.applyOp(op)
+      });
+    }, 0);
   }
-
-  _updateField(fields, value) {
-    if (typeof value === 'number') {
-      fields.pos = value;
-    } else if (typeof value === 'string') {
-      fields.insertStr = value;
-    } else if (typeof value === 'object' && value.d !== undefined) {
-      fields.delNum = value.d;
-    }
-  };
-
-  onInsert(position, text) {
-    const previous = this.snapshot.replace(/\r\n/g, '\n');
-    this.replaceText(previous.slice(0, position) + text + previous.slice(position));
-  };
-
-  replaceText(newText) {
-    this.snapshot = newText;
-  };
-
-  onRemove(position, length) {
-    const previous = this.snapshot.replace(/\r\n/g, '\n');
-    this.replaceText(previous.slice(0, position) + previous.slice(position + length));
-  };
 
   render() {
     const {
