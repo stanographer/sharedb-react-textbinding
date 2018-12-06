@@ -20,3 +20,8 @@ dist
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+#test features
+
+src/binding-with-multiflags.js
+src/binding-ottext.js

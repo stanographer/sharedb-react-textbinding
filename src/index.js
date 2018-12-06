@@ -9,7 +9,7 @@ export default class ShareDBBinding extends Component {
     elementType: PropTypes.string,
     onLoaded: PropTypes.func,
     style: PropTypes.object,
-    subs: PropTypes.object
+    flag: PropTypes.string
   };
 
   constructor(props) {
@@ -43,7 +43,7 @@ export default class ShareDBBinding extends Component {
 
     doc.on('load', () => {
       console.log(doc.data);
-      this.binding = new Binding(doc.data);
+      this.binding = new Binding(doc.data, this.props.flag);
 
       this.setState({
         text: this.binding.snapshot
