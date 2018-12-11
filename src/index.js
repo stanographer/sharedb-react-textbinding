@@ -21,6 +21,7 @@ export default class ShareDBBinding extends Component {
       text: ''
     };
 
+    this.sharedTextArea = React.createRef();
     this.handleTextOnChange = this.handleTextOnChange.bind(this);
   }
 
@@ -52,6 +53,7 @@ export default class ShareDBBinding extends Component {
     });
 
     doc.on('load', () => {
+      this.doc = doc;
       this.binding = new Binding(doc.data, this.props.flag);
 
       this.setState({
@@ -79,7 +81,12 @@ export default class ShareDBBinding extends Component {
   }
 
   handleTextOnChange(e) {
-    // Implement.
+    const { doc, onLoaded } = this.props;
+    this.binding.applyLocalChange(doc, this.binding.snapshot, e.target.value);
+
+    this.setState({
+      text: this.binding.snapshot
+    });
   }
 
   render() {
@@ -100,9 +107,11 @@ export default class ShareDBBinding extends Component {
         {text}
       </div>
       : <textarea
+        ref={this.sharedTextArea}
         className={cssClass || ''}
+        style={style || ''}
         cols={cols || 100}
-        rows={rows || 100}
+        rows={rows || 10}
         value={text}
         onChange={e => this.handleTextOnChange(e)} />;
     return (
