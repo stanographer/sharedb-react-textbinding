@@ -5,9 +5,11 @@ import Binding from './binding';
 export default class ShareDBBinding extends Component {
   static propTypes = {
     cssClass: PropTypes.string,
+    cols: PropTypes.number,
     doc: PropTypes.object,
     elementType: PropTypes.string,
     onLoaded: PropTypes.func,
+    rows: PropTypes.number,
     style: PropTypes.object,
     flag: PropTypes.string
   };
@@ -18,6 +20,8 @@ export default class ShareDBBinding extends Component {
     this.state = {
       text: ''
     };
+
+    this.handleTextOnChange = this.handleTextOnChange.bind(this);
   }
 
   componentWillMount() {
@@ -25,9 +29,15 @@ export default class ShareDBBinding extends Component {
   }
 
   componentWillUnmount() {
+    this.props.doc.removeListener();
     this.props.doc.unsubscribe();
     this.props.doc.destroy();
+    this.binding = null;
   }
+
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return this.state.text !== nextState.text;
+  // }
 
   subscribe(props) {
     const { doc, onLoaded } = props;
@@ -42,7 +52,6 @@ export default class ShareDBBinding extends Component {
     });
 
     doc.on('load', () => {
-      console.log(doc.data);
       this.binding = new Binding(doc.data, this.props.flag);
 
       this.setState({
@@ -51,43 +60,51 @@ export default class ShareDBBinding extends Component {
     });
 
     doc.on('del', () => {
+      doc.removeListener();
       doc.destroy();
       doc.unsubscribe();
     });
 
     doc.on('op', op => {
-      this.updateField(op);
+      setTimeout(() => {
+        this.updateField(op);
+      }, 0);
     });
   }
 
   updateField(op) {
-    setTimeout(() => {
-      this.setState({
-        text: this.binding.applyOp(op)
-      });
-    }, 0);
+    this.setState({
+      text: this.binding.applyOp(op)
+    });
+  }
+
+  handleTextOnChange(e) {
+    // Implement.
   }
 
   render() {
     const {
+      cols,
       cssClass,
       elementType,
+      rows,
       style
     } = this.props;
 
     const { text } = this.state;
 
-    const element = elementType === 'contentEditable'
+    const element = elementType === 'div'
       ? <div
         className={cssClass || ''}
         style={style || ''}>
         {text}
       </div>
       : <textarea
+        className={cssClass || ''}
+        cols={cols || 100}
+        rows={rows || 100}
         value={text}
-        cols={100}
-        rows={100} />;
-
+        onChange={e => this.handleTextOnChange(e)} />;
     return (
       element
     );
