@@ -25,3 +25,6 @@ yarn-error.log*
 
 src/binding-with-multiflags.js
 src/binding-ottext.js
+src/ReactStringBinding.js
+src/binding-textarea.js
+src/index-textarea.js

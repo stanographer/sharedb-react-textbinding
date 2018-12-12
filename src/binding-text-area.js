@@ -47,4 +47,54 @@ export default class Binding {
     // to the snapshot and send it back to applyOp().
     return newDoc.join('') + snap;
   };
+
+  applyLocalChange = (doc, snap, change) => {
+    // Strings are immutable and have reference equality.
+    // I think this test is O(1), so its worth doing.
+    if (snap === change) return;
+
+    console.log(doc.type);
+
+    let start = 0;
+
+    // Scan the document. While all characters in the change document
+    // and the new document are the same, keep advancing.
+    while (snap.charAt(start) === change.charAt(start)) {
+      start++;
+    }
+
+    let end = 0;
+
+    // Scan the other end of document. While all characters in the change document
+    // and the new document are the same, keep advancing toward start.
+    while (snap.charAt(snap.length - 1 - end) === change.charAt(change.length - 1 - end) &&
+    start + end < snap.length &&
+    start + end < change.length) {
+      end++;
+    }
+
+    const onInsert = (position, text) => {
+      console.log(start, text);
+      let op = [position, text];
+      doc.submitOp(op);
+    };
+
+    const onRemove = (position, length) => {
+
+      let op = [position, '', { d: length }];
+      console.log(op);
+      this.applyOp(op);
+      doc.submitOp(op);
+    };
+
+    if (snap.length !== start + end) {
+      // snap = change.slice(start, change.length - end);
+      onRemove(start, snap.length - start - end);
+    }
+
+    if (change.length !== start + end) {
+      onInsert(start, change.slice(start, change.length - end));
+    }
+    this.snapshot = doc.data;
+  };
 }
